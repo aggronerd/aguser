@@ -28,16 +28,34 @@ class AguserTest < ActiveSupport::TestCase
   end
 
   test 'User: scope test with namespaces' do
-    user = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 0})
-    assert user.save
-    user = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 1})
-    assert user.save
-    user = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 0})
-    assert_not user.save
-    user = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 1})
-    assert_not user.save
-    user = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 2})
-    assert user.save
+
+    assert NamespacedUser.new(WORKING_USER_PARAMS.merge({namespace: 0})).save
+    assert NamespacedUser.new(WORKING_USER_PARAMS.merge({namespace: 1})).save
+    assert_not NamespacedUser.new(WORKING_USER_PARAMS.merge({namespace: 0})).save
+    assert_not NamespacedUser.new(WORKING_USER_PARAMS.merge({namespace: 1})).save
+    assert NamespacedUser.new(WORKING_USER_PARAMS.merge({namespace: 2})).save
+  end
+
+  test 'User: scope test with namespace login' do
+    user1 = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 0})
+    user2 = NamespacedUser.create WORKING_USER_PARAMS.merge({namespace: 1})
+
+    assert_equal user1.id, NamespacedUser.authenticate('test_user', 'testing', namespace: 0).id
+    assert_equal user2.id, NamespacedUser.authenticate('test_user', 'testing', namespace: 1).id
+  end
+
+  test 'User: test invalid login' do
+    User.create WORKING_USER_PARAMS
+    assert_not_nil User.authenticate('test_user', 'testing')
+    assert_nil User.authenticate('test_user', 'something_else')
+  end
+
+  test 'User: test disabled user' do
+    user = DisableableUser.create WORKING_USER_PARAMS.merge({disabled: true})
+    assert_nil DisableableUser.authenticate('test_user', 'testing')
+    user.disabled = false
+    user.save!
+    assert_not_nil DisableableUser.authenticate('test_user', 'testing')
   end
 
 

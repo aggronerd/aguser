@@ -1,13 +1,12 @@
 module Aguser
 
   def self.encrypted_password(password, salt)
-    unless Rails.configuration.x.auth.secret.nil?
-      string_to_hash = password + Rails.configuration.x.auth.secret + salt
-    else
+    if Rails.configuration.x.auth.secret.nil?
       Rails.logger.warn 'Could not find value for "config.x.auth.secret" in the Rails config. It is highly recommended you set a unique value for this in your environment!'
       string_to_hash = password + salt
+    else
+      string_to_hash = password + Rails.configuration.x.auth.secret + salt
     end
-
     Digest::SHA1.hexdigest(string_to_hash)
   end
 
@@ -21,7 +20,7 @@ module Aguser
 
       def validate(record)
         if (record.password or record.password_confirmation) and record.password != record.password_confirmation
-          record.errors[:password_confirmation] << 'Password confirmation doesn\t match the password given'
+          record.errors[:password_confirmation] << 'Password confirmation doesn\'t match the password given'
         end
       end
 
@@ -45,9 +44,8 @@ module Aguser
         validates_presence_of :password_confirmation, :password, :if => :new_record?
         validates_with PasswordMatchValidator
 
-
         include Aguser::ActsAsUser::LocalInstanceMethods
-        self.send :include, Aguser::ActsAsUser::AuthenticatedClassMethods
+        self.class.send :include, Aguser::ActsAsUser::AuthenticatedClassMethods
       end
     end
 
@@ -74,15 +72,23 @@ module Aguser
 
     module AuthenticatedClassMethods
 
-      def self.authenticate(user_name, password)
-        user = self.where(verify_scope(self.user_scope).merge!(user_name: user_name)).first
+      def authenticate(user_name, password, scope = {})
+        user = self.where(verify_scope(scope).merge(user_name: user_name)).first
         if user
           expected_password = Aguser::encrypted_password(password, user.salt)
-          if user.hashed_password != expected_password or user.disabled
+          if user.hashed_password != expected_password or (user.respond_to? :disabled and user.disabled)
             user = nil
           end
         end
         user
+      end
+
+      # Verifies the keys for the scope defined in the class.
+      def verify_scope(scope)
+        self.user_scope.each do |sym|
+          raise RuntimeError, "Expected to be passed a scope containing the key '#{sym.to_s}'" unless scope.has_key? sym
+        end
+        scope
       end
 
     end

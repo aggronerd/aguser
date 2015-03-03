@@ -1,4 +1,4 @@
 class User < ActiveRecord::Base
 
-  acts_as_user scope: []
+  acts_as_user
 end

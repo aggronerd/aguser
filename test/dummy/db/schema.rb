@@ -11,7 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150303164715) do
+ActiveRecord::Schema.define(version: 20150303183438) do
+
+  create_table "disableable_users", force: :cascade do |t|
+    t.string  "user_name"
+    t.string  "hashed_password"
+    t.string  "salt"
+    t.boolean "disabled",        default: false
+  end
 
   create_table "namespaced_users", force: :cascade do |t|
     t.string  "user_name"

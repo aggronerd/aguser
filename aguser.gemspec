@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
   s.version     = Aguser::VERSION
   s.authors     = ["Gregory Doran"]
   s.email       = ["greg@gregorydoran.co.uk"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of Aguser."
-  s.description = "TODO: Description of Aguser."
+  s.homepage    = "https://bitbucket.org/aggronerd/aguser"
+  s.summary     = "A authenication module for Ruby on Rails."
+  s.description = "A authenication module for Ruby on Rails."
   s.license     = "MIT"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
