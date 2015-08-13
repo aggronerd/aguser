@@ -44,7 +44,7 @@ module Aguser
           validates :password_confirmation, presence: { if: :new_record? }
           validates :password, presence: { if: :new_record? }
         end
-        validates :user_name, length: { minimum: 4, allow_nil: true, allow_blank: false }, uniqueness: {scope: self.user_scope}
+        validates :user_name, length: { minimum: 4, allow_nil: true, allow_blank: false }, uniqueness: {scope: self.user_scope, allow_nil: true, allow_blank: false}
         validates_with PasswordMatchValidator
 
         include Aguser::ActsAsUser::LocalInstanceMethods

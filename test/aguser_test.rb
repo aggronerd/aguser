@@ -61,8 +61,10 @@ class AguserTest < ActiveSupport::TestCase
   test 'User: test where user name is optional' do
     user1 = UserNameOptional.create! WORKING_USER_PARAMS.merge({some_data: 'person 1'})
     user2 = UserNameOptional.new some_data: 'person 2'
+    user3 = UserNameOptional.new some_data: 'person 1'
 
     assert user2.save, 'Failed to create user without user_name'
+    assert user3.save, 'Failed to create user without user_name'
     assert_equal user1, UserNameOptional.authenticate('test_user', 'testing')
   end
 
