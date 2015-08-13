@@ -39,9 +39,12 @@ module Aguser
         attr_accessor :password_confirmation
 
         # Set up validation
-        validates_presence_of :user_name
-        validates_uniqueness_of :user_name, scope: self.user_scope
-        validates_presence_of :password_confirmation, :password, :if => :new_record?
+        unless options[:optional] == true
+          validates :user_name, presence: true
+          validates :password_confirmation, presence: { if: :new_record? }
+          validates :password, presence: { if: :new_record? }
+        end
+        validates :user_name, length: { minimum: 4, allow_nil: true, allow_blank: false }, uniqueness: {scope: self.user_scope}
         validates_with PasswordMatchValidator
 
         include Aguser::ActsAsUser::LocalInstanceMethods
@@ -73,14 +76,18 @@ module Aguser
     module AuthenticatedClassMethods
 
       def authenticate(user_name, password, scope = {})
-        user = self.where(verify_scope(scope).merge(user_name: user_name)).first
-        if user
-          expected_password = Aguser::encrypted_password(password, user.salt)
-          if user.hashed_password != expected_password or (user.respond_to? :disabled and user.disabled)
-            user = nil
+        if user_name.blank? or password.blank?
+          nil
+        else
+          user = self.where(verify_scope(scope).merge(user_name: user_name)).first
+          if user
+            expected_password = Aguser::encrypted_password(password, user.salt)
+            if user.hashed_password != expected_password or (user.respond_to? :disabled and user.disabled)
+              user = nil
+            end
           end
+          user
         end
-        user
       end
 
       # Verifies the keys for the scope defined in the class.

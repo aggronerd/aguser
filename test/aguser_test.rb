@@ -58,5 +58,21 @@ class AguserTest < ActiveSupport::TestCase
     assert_not_nil DisableableUser.authenticate('test_user', 'testing')
   end
 
+  test 'User: test where user name is optional' do
+    user1 = UserNameOptional.create! WORKING_USER_PARAMS.merge({some_data: 'person 1'})
+    user2 = UserNameOptional.new some_data: 'person 2'
+
+    assert user2.save, 'Failed to create user without user_name'
+    assert_equal user1, UserNameOptional.authenticate('test_user', 'testing')
+  end
+
+  test 'Authenticate: nil username hack' do
+    UserNameOptional.create! some_data: 'person 2', password: 'testing', password_confirmation: 'testing'
+    assert_nil UserNameOptional.authenticate(nil, 'testing')
+  end
+
+  test 'Authenticate: blank username hack' do
+    assert_not UserNameOptional.new(some_data: 'person 2', password: 'testing', password_confirmation: 'testing', user_name: '').save
+  end
 
 end

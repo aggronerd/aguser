@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    aguser (0.0.2)
+    aguser (0.0.3)
       rails (~> 4.2.0)
 
 GEM
@@ -110,3 +110,6 @@ PLATFORMS
 DEPENDENCIES
   aguser!
   sqlite3
+
+BUNDLED WITH
+   1.10.6
